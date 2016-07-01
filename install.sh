@@ -3,7 +3,7 @@
 #
 #  install.sh
 #
-#  Copyright © 2013-2015 Antergos
+#  Copyright © 2013-2016 Antergos
 #
 #  This file is part of Antergos.
 #
@@ -22,34 +22,27 @@
 #  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 #  MA 02110-1301, USA.
 
-_ANT_USER_NAME="${1}"
+_ANT_USER_NAME="$1"
 
-if [[ "${2}" = 'no-overwrite' ]]; then
-	_ANT_OVERWRITE='-n'
-else
-	_ANT_OVERWRITE=' '
+{ [[ "$2" = 'no-overwrite' ]] && _ANT_OVERWRITE='-n'; } || _ANT_OVERWRITE=' '
+
+if [[ -z "${_ANT_USER_NAME}" ]]; then
+	echo "Usage:"
+	echo "./install.sh username"
+	exit 1
 fi
 
-if [ "${_ANT_USER_NAME}" = "" ]; then
-  echo "Usage:"
-  echo "./install.sh username"
-  exit 0
-fi
+echo "Applying Antergos MATE setup to user: ${_ANT_USER_NAME}"
 
-echo "Setting Antergos KDE setup to user ${_ANT_USER_NAME}"
-
-# All necessary files are in /DESTDIR/usr/share/antergos-kde-setup
-_ANT_SRCDIR=/usr/share/antergos-kde-setup
+# All necessary files are in /usr/share/antergos-mate-setup
+_ANT_SRCDIR=/usr/share/antergos-mate-setup
 _ANT_DSTDIR="/home/${_ANT_USER_NAME}"
 
-# Setup logo for kinfocenter's about distro screen
-cp "${_ANT_SRCDIR}/antergos-logo.svg" /usr/share/about-distro/
-sed -i 's|archlinux|antergos|g' /etc/xdg/kcm-about-distrorc
-
-# Copy generic files (this should be done in the PKGBUILD)
-cp -R "${_ANT_OVERWRITE}" -t /usr/share "${_ANT_SRCDIR}/icons" "${_ANT_SRCDIR}/skel"
+# Copy system files
+cp -R "${_ANT_OVERWRITE}" -t /usr/share "${_ANT_SRCDIR}/icons"
+cp -R "${_ANT_OVERWRITE}" -t /etc "${_ANT_SRCDIR}/skel"
 
 # Copy user files
-cp -R "${_ANT_OVERWRITE}" -t "${_ANT_DSTDIR}" "${_ANT_SRCDIR}/skel/.config"
+cp -R "${_ANT_OVERWRITE}" -t "${_ANT_DSTDIR}" /etc/skel/***
 
 chown -R "${_ANT_USER_NAME}:users" "${_ANT_DSTDIR}"
